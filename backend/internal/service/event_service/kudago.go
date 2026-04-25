@@ -120,8 +120,8 @@ func (s *KudaGoService) mapToEvent(r kudagoResult, day time.Time) *model.Event {
 
 	return &model.Event{
 		Title:        r.Object.Title,
-		StartTime:    startTime.Format("15:04"),
-		EndTime:      endTime.Format("15:04"),
+		StartTime:    startTime,
+		EndTime:      endTime,
 		Location:     r.Object.Place.Address,
 		Coords:       coords,
 		ExternalLink: r.Object.ItemURL,
