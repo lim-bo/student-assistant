@@ -124,8 +124,8 @@ func (s *ScienceGateService) mapToEvent(r scienceGateResult) *model.Event {
 
 	return &model.Event{
 		Title:        r.Title,
-		StartTime:    startTime.Format("15:04"),
-		EndTime:      endTime.Format("15:04"),
+		StartTime:    startTime,
+		EndTime:      endTime,
 		Location:     r.Location,
 		Coords:       coords,
 		ExternalLink: r.Site,
