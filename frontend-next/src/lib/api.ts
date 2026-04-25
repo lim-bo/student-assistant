@@ -100,6 +100,14 @@ const schedule: Schedule[] = [
                 tags: ["IT", "frontend"],
                 external_url: "https://kudago.com/event/123123",
             },
+            {
+                type: "class",
+                time_start: "14:00",
+                time_end: "15:00",
+                title: "Математический анализ",
+                location: "ул. F, 9, ауд. 106",
+                coords: [12.0, 12.0],
+            },
         ],
     },
 ];

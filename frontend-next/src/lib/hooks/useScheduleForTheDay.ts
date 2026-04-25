@@ -80,7 +80,6 @@ const transformTimeline = (
                 id: nanoid(),
             });
         } else if (item.type === "event" && result.length > 0) {
-            // Find the last in-person class (skip remote classes)
             for (let i = result.length - 1; i >= 0; i--) {
                 if (result[i].type === "class") {
                     (result[i] as TransformedClass).events.push({
