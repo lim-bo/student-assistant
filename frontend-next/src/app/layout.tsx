@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Inter } from "next/font/google";
 import QueryProvider from "@/providers/query-provider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
 });
-
-const inter = Inter({ subsets: ["latin"] });
 
 const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
@@ -28,7 +25,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
+            >
                 <QueryProvider>{children}</QueryProvider>
             </body>
         </html>

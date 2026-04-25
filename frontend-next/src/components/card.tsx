@@ -12,7 +12,13 @@ export default function Card({
     ...props
 }: CardProps) {
     return (
-        <div className={m("p-1 rounded-sm", className)} {...props}>
+        <div
+            className={m(
+                "p-1 rounded-sm w-100 h-fit shadow-2xl border-gray-100 border",
+                className,
+            )}
+            {...props}
+        >
             {children}
         </div>
     );
