@@ -1,4 +1,4 @@
-interface InPersonClass {
+export interface InPersonClass {
     type: "class";
     time_start: string;
     time_end: string;
@@ -7,14 +7,14 @@ interface InPersonClass {
     coords: [number, number];
 }
 
-interface RemoteClass {
+export interface RemoteClass {
     type: "remote";
     time_start: string;
     time_end: string;
     title: string;
 }
 
-interface EventItem {
+export interface EventItem {
     type: "event";
     time_start: string;
     time_end: string;
@@ -25,7 +25,7 @@ interface EventItem {
     external_url: string;
 }
 
-type TimelineItem = InPersonClass | RemoteClass | EventItem;
+export type TimelineItem = InPersonClass | RemoteClass | EventItem;
 
 interface Schedule {
     group: number;
