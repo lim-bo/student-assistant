@@ -19,7 +19,7 @@ type etuScheduleResponse map[string]etuScheduleEntry
 
 type etuScheduleEntry struct {
 	Group string            `json:"group"`
-	Days  map[string]etuDay `json:"days"` // "0"=пн ... "6"=вс
+	Days  map[string]etuDay `json:"days"`
 }
 
 type etuDay struct {
@@ -28,26 +28,12 @@ type etuDay struct {
 }
 
 type etuLesson struct {
-	Name             string          `json:"name"`
-	SubjectType      string          `json:"subjectType"` // "Лек", "Пр", "Лаб"
-	Teacher          string          `json:"teacher"`
-	SecondTeacher    string          `json:"second_teacher"`
-	Week             string          `json:"week"`
-	StartTime        string          `json:"start_time"`
-	EndTime          string          `json:"end_time"`
-	StartTimeSeconds int             `json:"start_time_seconds"`
-	EndTimeSeconds   int             `json:"end_time_seconds"`
-	Room             string          `json:"room"`
-	IsDistant        bool            `json:"is_distant"`
-	TempChanges      []etuTempChange `json:"temp_changes"`
-}
-
-type etuTempChange struct {
-	Type      string `json:"type"`
-	Teacher   string `json:"teacher,omitempty"`
-	Room      string `json:"room,omitempty"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	Name      string `json:"name"`
+	Week      string `json:"week"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+	Room      string `json:"room"`
+	Form      string `json:"form"`
 }
 
 func (c *EtuClient) GetSchedule(groupNumber string, date time.Time) ([]model.ScheduleLesson, error) {
@@ -77,13 +63,54 @@ func (c *EtuClient) GetSchedule(groupNumber string, date time.Time) ([]model.Sch
 	return convertLessons(day.Lessons, date, weekNumber), nil
 }
 
-func (c *EtuClient) GetDaySchedule(groupNumber string, date time.Time) (*model.DaySchedule, error) {
-	lessons, err := c.GetSchedule(groupNumber, date)
-	if err != nil {
-		return nil, err
+func convertLessons(raw []etuLesson, date time.Time, currentWeek int) []model.ScheduleLesson {
+	y, m, d := date.Date()
+	loc := date.Location()
+	result := make([]model.ScheduleLesson, 0)
+
+	seen := make(map[string]bool)
+
+	for _, l := range raw {
+		if l.Week != fmt.Sprintf("%d", currentWeek) {
+			continue
+		}
+
+		key := l.Name + l.StartTime
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		formOfStudy := formOfStudy(l.Form)
+
+		var location *string
+		var lat, lon *float64
+
+		if l.Name == "Военно-морская подготовка" { // захардкодил
+			addr := "Улица Профессора Попова, 37Б лит А"
+			la, lo := 59.971582, 30.296756
+			location = &addr
+			lat = &la
+			lon = &lo
+		} else if formOfStudy != "remote" {
+			addr := fmt.Sprintf("%s, ауд. %s", roomAddress(l.Room), l.Room)
+			la, lo := roomCoords(l.Room)
+			location = &addr
+			lat = &la
+			lon = &lo
+		}
+
+		result = append(result, model.ScheduleLesson{
+			Title:       l.Name,
+			Location:    location, // null в JSON если remote
+			Type:        formOfStudy,
+			StartTime:   parseHHMM(l.StartTime, y, m, d, loc),
+			EndTime:     parseHHMM(l.EndTime, y, m, d, loc),
+			LocationLat: lat,
+			LocationLon: lon,
+		})
 	}
 
-	return &model.DaySchedule{Date: date, Lessons: lessons}, nil
+	return result
 }
 
 func roomCoords(room string) (lat, lon float64) {
@@ -107,7 +134,6 @@ func roomCoords(room string) (lat, lon float64) {
 	return 0, 0
 }
 
-// адрес корпуса по первой цифре аудитории
 func roomAddress(room string) string {
 	if len(room) == 0 {
 		return ""
@@ -142,41 +168,14 @@ func weekdayToEtu(wd time.Weekday) string {
 	return m[wd]
 }
 
-func convertLessons(raw []etuLesson, date time.Time, currentWeek int) []model.ScheduleLesson {
-	y, m, d := date.Date()
-	loc := date.Location()
-	result := make([]model.ScheduleLesson, 0)
-
-	// API дублирует каждую пару дважды (неделя 1 и неделя 2).
-	// Оставляем только нужную неделю + дедуплицируем.
-	seen := make(map[string]bool)
-
-	for _, l := range raw {
-		if l.Week != fmt.Sprintf("%d", currentWeek) {
-			continue
-		}
-
-		key := l.Name + l.StartTime
-		if seen[key] {
-			continue
-		}
-		seen[key] = true
-
-		lat, lon := roomCoords(l.Room)
-		address := roomAddress(l.Room)
-
-		result = append(result, model.ScheduleLesson{
-			Title:       l.Name,
-			Location:    fmt.Sprintf("%s, ауд. %s", address, l.Room), // "Улица Профессора Попова, 5 лит Б, ауд. 1122"
-			Type:        l.SubjectType,
-			StartTime:   parseHHMM(l.StartTime, y, m, d, loc),
-			EndTime:     parseHHMM(l.EndTime, y, m, d, loc),
-			LocationLat: lat,
-			LocationLon: lon,
-		})
+func formOfStudy(form string) string {
+	switch form {
+	case "standard":
+		return "class"
+	case "distant", "online":
+		return "remote"
 	}
-
-	return result
+	return ""
 }
 
 func getWeekNumber(date time.Time) int {
