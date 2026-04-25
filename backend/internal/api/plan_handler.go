@@ -77,11 +77,18 @@ func (h *Handler) Plan(w http.ResponseWriter, r *http.Request) {
 
 	timeline := make([]*model.TimelineItem, 0, 4)
 	j := 0
-	for i := 0; i < len(lessons)-1; i++ {
+	for i := 0; i < len(lessons); i++ {
 		timeline = append(timeline, lessons[i].ToTimelineItem())
-		for j < len(events) && events[j].StartTime.Before(lessons[i+1].StartTime) {
-			timeline = append(timeline, events[j].ToTimelineItem())
-			j++
+		if i == len(lessons)-1 {
+			for j < len(events) {
+				timeline = append(timeline, events[j].ToTimelineItem())
+				j++
+			}
+		} else {
+			for j < len(events) && events[j].StartTime.Before(lessons[i].StartTime) {
+				timeline = append(timeline, events[j].ToTimelineItem())
+				j++
+			}
 		}
 	}
 
