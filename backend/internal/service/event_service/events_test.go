@@ -8,13 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/student-assistant/internal/model"
-	eventservice "github.com/student-assistant/internal/service/EventService"
+	eventservice "github.com/student-assistant/internal/service/event_service"
 	geocoding "github.com/student-assistant/pkg/GeoCoding"
 )
 
 func TestGetEvents(t *testing.T) {
 	opts := eventservice.Options{
 		Date: time.Now().Truncate(time.Hour * 24),
+		Loc:  eventservice.Spb,
 	}
 
 	services := []eventservice.EventService{

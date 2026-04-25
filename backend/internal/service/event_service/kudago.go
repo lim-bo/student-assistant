@@ -33,6 +33,7 @@ func (s *KudaGoService) GetEvents(opts Options) ([]*model.Event, error) {
 	q := req.URL.Query()
 	q.Add("date", opts.Date.Format(time.DateOnly))
 	q.Add("expand", "object,place")
+	q.Add("location", string(opts.Loc))
 
 	req.URL.RawQuery = q.Encode()
 
