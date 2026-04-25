@@ -15,6 +15,12 @@ type EtuClient struct {
 	http *http.Client
 }
 
+func NewEtuClient() *EtuClient {
+	return &EtuClient{
+		http: &http.Client{Timeout: 10 * time.Second},
+	}
+}
+
 type etuScheduleResponse map[string]etuScheduleEntry
 
 type etuScheduleEntry struct {
