@@ -58,7 +58,7 @@ func (h *Handler) Plan(w http.ResponseWriter, r *http.Request) {
 	events := make([]*model.Event, 0, 5)
 	eg.Go(func() error {
 		for _, svc := range h.eventServices {
-			eventsChunk, err := svc.GetEvents(eventservice.Options{Date: date})
+			eventsChunk, err := svc.GetEvents(eventservice.Options{Date: date, Loc: eventservice.Spb})
 			if err != nil {
 				slog.Error("Error getting events", slog.String("error", err.Error()))
 				return err
