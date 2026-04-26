@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { globalMockData } from "@/lib/api";
+import { API_CONFIG, globalMockData } from "@/lib/api";
 import { nanoid } from "nanoid";
 
 interface TransformedRemoteClass {
@@ -99,18 +99,15 @@ export const useScheduleForTheDay = (day: Date, group: number) => {
     return useQuery<TransformedSchedule | undefined>({
         queryKey: ["schedule", day.toDateString(), group],
         queryFn: async () => {
-            const rawSchedule = globalMockData.schedule.find((item) => {
-                return (
-                    item.date.getDate() === day.getDate() &&
-                    item.group === group
-                );
-            });
-
-            if (!rawSchedule) {
+            const date = day.toISOString().split("T")[0];
+            const response = await fetch(`${API_CONFIG.BASE_URL}/schedule?date=${date}&group=${group}`);
+            if (!response.ok) {
+                console.log("Fetch error");
                 return undefined;
             }
 
-            return transformTimeline(rawSchedule.timeline);
+            const body = await response.json();
+            return transformTimeline(body.timeline);
         },
     });
 };

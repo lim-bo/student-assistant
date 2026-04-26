@@ -22,7 +22,7 @@ interface EventItem {
 
 export default function Schedule() {
     const params = useSearchParams();
-    const groupId = Number(params.get("group-id")) ?? 3376;
+    const groupId = Number(params.get("group")) ?? 3376;
     const date = params.get("date") ?? "2010-10-10";
     const [routeStage, setRouteStage] = useState<boolean>(false);
     const [expandedDropdowns, setExpandedDropdowns] = useState<
